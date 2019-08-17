@@ -15,7 +15,8 @@ const Account = Schema({
         },
         passwordHash: String,
         isActivated: Boolean,
-        isLocked: Boolean
+        isLocked: Boolean,
+        activationCode: String
     }, {
         timestamps: true
     }
@@ -39,5 +40,6 @@ Account.methods.comparePassword = function(inputPassword, next) {
         next(null, isEqual)
     })
 }
+
 
 module.exports = mongoose.model('Accounts', Account)

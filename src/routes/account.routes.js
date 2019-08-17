@@ -3,5 +3,6 @@ module.exports = (app) => {
 
     app.post('/accounts/register', accountsController.registerAccount)
     app.post('/login', accountsController.login)
+    app.get('/activate/:activationCode', accountsController.activateAccount)
 
 }

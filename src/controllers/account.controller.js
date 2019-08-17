@@ -1,6 +1,8 @@
 const AccountModel = require('../models/account.model');
 const jwt = require('jsonwebtoken')
-const { gtSecret } = require('../../config');
+const { gtSecret, sendgridSecret, appEmail, activationTemplateCode } = require('../../config');
+const sgMail = require('@sendgrid/mail')
+
 require('dotenv').config();
 
 exports.registerAccount = (req, res) => {
@@ -16,15 +18,16 @@ exports.registerAccount = (req, res) => {
         passwordHash: req.body.passwordHash,
         firstName: req.body.firstName,
         lastName: req.body.lastName,
-        isActivated: req.body.isActivated,
-        isLocked: req.body.isLocked
+        isActivated: false,
+        isLocked: false,
+        activationCode: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
     })
 
     account.save()
         .then(result => {
+            sendActivationEmail(req.body.emailAddress, `http://localhost:3000/activate/${result.activationCode}`)
             res.status(200).send({
-                message: `Registration successful.`,
-                account: result
+                message: `Registration successful. Check your e-mail address to activate your account.`,
             })
         })
         .catch(error => {
@@ -67,4 +70,53 @@ exports.login = (req, res) => {
             })
         })
 
+}
+
+exports.activateAccount = (req, res) => {
+
+    AccountModel.findOneAndUpdate({
+        activationCode: req.params.activationCode,
+        isActivated: false
+    }, {
+        $set: {
+            isActivated: true,
+            activationCode: ''
+        }
+    }, function(err, doc) {
+        if (err) {
+            return res.status(400).send({
+                message: `An error occurred: ${err.message}`
+            })
+        }
+
+        if (doc) {
+            return res.status(200).send({
+                message: `Account has been activated.`
+            })
+        } else {
+            res.redirect('/')
+        }
+    })
+
+}
+
+function sendActivationEmail(emailAddress, activationKey) {
+    sgMail.setApiKey(sendgridSecret);
+    const msg = {
+        to: emailAddress,
+        from: appEmail,
+        templateId: activationTemplateCode,
+        dynamic_template_data: {
+            activation_link: activationKey
+
+        }
+
+    };
+    sgMail.send(msg)
+        .then(res => {
+            console.log(`Sent.`)
+        })
+        .catch(error => {
+            console.log(`Failed: ${error.message}`)
+        })
 }
