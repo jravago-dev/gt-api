@@ -14,6 +14,8 @@ const Account = Schema({
             required: [true, 'E-mail address is required.']
         },
         passwordHash: String,
+        firstName: String,
+        lastName: String,
         isActivated: Boolean,
         isLocked: Boolean,
         activationCode: String

@@ -1,6 +1,6 @@
 const AccountModel = require('../models/account.model');
 const jwt = require('jsonwebtoken')
-const { gtSecret, sendgridSecret, appEmail, activationTemplateCode } = require('../../config');
+const { gtSecret, sendgridSecret, appEmail, activationTemplateCode, apiLink } = require('../../config');
 const sgMail = require('@sendgrid/mail')
 
 require('dotenv').config();
@@ -25,7 +25,7 @@ exports.registerAccount = (req, res) => {
 
     account.save()
         .then(result => {
-            sendActivationEmail(req.body.emailAddress, `http://localhost:3000/activate/${result.activationCode}`)
+            sendActivationEmail(req.body.emailAddress, `${apiLink}/activate/${result.activationCode}`)
             res.status(200).send({
                 message: `Registration successful. Check your e-mail address to activate your account.`,
             })
@@ -50,6 +50,7 @@ exports.login = (req, res) => {
                         let token = jwt.sign({ accountId: account._id }, gtSecret)
                         res.status(200).json({
                             fullName: `${account.firstName} ${account.lastName}`,
+                            emailAddress: account.emailAddress,
                             token
                         })
                     } else {
