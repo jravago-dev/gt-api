@@ -15,7 +15,7 @@ app.use(bodyParser.json())
 require('./src/routes/account.routes')(app);
 
 
-mongoose.connect(dbConnection, { useNewUrlParser: true })
+mongoose.connect(dbConnection, { useNewUrlParser: true, useFindAndModify: false, useCreateIndex: true })
     .then(() => console.log(`Connected to Database.`))
     .catch(error => {
         console.log(`Cannot connect to Database: ${error}`);
