@@ -12,6 +12,9 @@ app.use(bodyParser.urlencoded({
 }))
 app.use(bodyParser.json())
 
+require('./src/routes/account.routes')(app);
+
+
 mongoose.connect(dbConnection, { useNewUrlParser: true })
     .then(() => console.log(`Connected to Database.`))
     .catch(error => {
