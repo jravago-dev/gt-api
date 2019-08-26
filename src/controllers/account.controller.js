@@ -23,18 +23,33 @@ exports.registerAccount = (req, res) => {
         activationCode: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
     })
 
-    account.save()
-        .then(result => {
-            sendActivationEmail(req.body.emailAddress, `${apiLink}/activate/${result.activationCode}`)
-            res.status(200).send({
-                message: `Registration successful. Check your e-mail address to activate your account.`,
-            })
-        })
-        .catch(error => {
+    AccountModel.findOne({
+        emailAddress: req.body.emailAddress
+    }).then((result) => {
+        if (result !== null) {
             res.status(400).send({
-                message: `${error.message}`
+                message: `That e-mail address is already taken.`
             })
-        })
+
+        } else {
+            account.save()
+                .then(result => {
+                    sendActivationEmail(req.body.emailAddress, `${apiLink}/activate/${result.activationCode}`)
+                    res.status(200).send({
+                        message: `Registration successful. Check your e-mail address to activate your account.`,
+                    })
+                })
+                .catch(error => {
+                    res.status(400).send({
+                        message: `${error.message}`
+                    })
+                })
+
+
+        }
+    })
+
+
 }
 
 exports.login = (req, res) => {
