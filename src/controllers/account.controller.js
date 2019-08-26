@@ -34,7 +34,7 @@ exports.registerAccount = (req, res) => {
         } else {
             account.save()
                 .then(result => {
-                    sendActivationEmail(req.body.emailAddress, `${apiLink}/activate/${result.activationCode}`)
+                    sendActivationEmail(req.body.emailAddress, `${apiLink}/activate/${result.activationCode}`, `${req.body.firstName}`)
                     res.status(200).send({
                         message: `Registration successful. Check your e-mail address to activate your account.`,
                     })
@@ -116,14 +116,15 @@ exports.activateAccount = (req, res) => {
 
 }
 
-function sendActivationEmail(emailAddress, activationKey) {
+function sendActivationEmail(emailAddress, activationKey, firstName) {
     sgMail.setApiKey(sendgridSecret);
     const msg = {
         to: emailAddress,
         from: appEmail,
         templateId: activationTemplateCode,
         dynamic_template_data: {
-            activation_link: activationKey
+            activation_link: activationKey,
+            name: firstName
 
         }
 
