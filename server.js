@@ -13,6 +13,7 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json())
 
 require('./src/routes/account.routes')(app);
+require('./src/routes/journal.routes')(app);
 
 
 mongoose.connect(dbConnection, { useNewUrlParser: true, useFindAndModify: false, useCreateIndex: true })
