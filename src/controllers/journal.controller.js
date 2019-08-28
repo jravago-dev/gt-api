@@ -3,22 +3,34 @@ require('dotenv').config();
 
 exports.getJournalEntries = (req, res) => {
 
-    JournalModel.find({
-            emailAddress: req.body.emailAddress,
-            isDeleted: false
-        })
-        .sort({
-            journalDate: -1
-        })
+    JournalModel
+        .aggregate([{
+                $match: {
+                    emailAddress: req.body.emailAddress,
+                    isDeleted: false
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        date: {
+                            $dateToString: { format: "%Y-%m-%d", date: "$journalDate" }
+                        }
+                    },
+                    journalEntries: {
+                        $push: '$$ROOT'
+                    }
+                }
+            }
+        ])
         .exec(function(err, journalRecords) {
             if (err) {
                 return res.status(400).send({
                     message: `Cannot retrieve journal entries: ${err.message}`
                 })
             }
-            return res.status(200).send({
-                journalRecords
-            })
+
+            return res.status(200).send(journalRecords)
 
         })
 
