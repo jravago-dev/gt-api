@@ -21,6 +21,11 @@ exports.getJournalEntries = (req, res) => {
                         $push: '$$ROOT'
                     }
                 }
+            },
+            {
+                $sort: {
+                    "_id.date": -1
+                }
             }
         ])
         .exec(function(err, journalRecords) {
